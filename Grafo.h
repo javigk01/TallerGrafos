@@ -7,6 +7,7 @@
 #include <set>
 #include <limits>
 #include <functional>
+#include <algorithm>
 #include "Nodo.h"
 
 class Grafo {
@@ -115,46 +116,53 @@ public:
         return distancia;
     }
 
-    std::vector<int> recorridoDFSporMST() {
-        std::vector<int> mst = prim(); // Paso 1: obtener MST
-        int n = cantidadNodos();
-    
-        // Paso 2: construir lista de adyacencia del MST
-        std::vector<std::vector<int>> adyacencia(n);
-        for (int i = 0; i < n; ++i) {
-            if (mst[i] != -1) {
-                adyacencia[i].push_back(mst[i]);
-                adyacencia[mst[i]].push_back(i);
-            }
+std::vector<int> recorridoDFSporMST() {
+    std::vector<int> mst = prim();
+    int n = cantidadNodos();
+
+    // Construir lista de adyacencia del MST
+    std::vector<std::vector<int>> adyacencia(n);
+    for (int i = 0; i < n; ++i) {
+        if (mst[i] != -1) {
+            adyacencia[i].push_back(mst[i]);
+            adyacencia[mst[i]].push_back(i);
         }
-    
-        // Paso 3: hacer DFS desde el nodo más cercano a (0,0)
-        int inicio = 0;
-        float minDist = std::numeric_limits<float>::max();
-        Nodo origen(0, 0);
-        for (int i = 0; i < n; ++i) {
-            float d = std::sqrt((nodos[i].x - origen.x)*(nodos[i].x - origen.x) + 
-                                (nodos[i].y - origen.y)*(nodos[i].y - origen.y));
-            if (d < minDist) {
-                minDist = d;
-                inicio = i;
-            }
-        }
-    
-        std::vector<bool> visitado(n, false);
-        std::vector<int> recorrido;
-    
-        std::function<void(int)> dfs = [&](int u) {
-            visitado[u] = true;
-            recorrido.push_back(u);
-            for (int v : adyacencia[u]) {
-                if (!visitado[v]) dfs(v);
-            }
-        };
-    
-        dfs(inicio);
-        return recorrido; // Orden de perforación aproximado
     }
+
+    // Encontrar nodo más cercano a (0,0)
+    int inicio = 0;
+    float minDist = std::numeric_limits<float>::max();
+    Nodo origen(0, 0);
+    for (int i = 0; i < n; ++i) {
+        float d = std::sqrt((nodos[i].x - origen.x)*(nodos[i].x - origen.x) +
+                            (nodos[i].y - origen.y)*(nodos[i].y - origen.y));
+        if (d < minDist) {
+            minDist = d;
+            inicio = i;
+        }
+    }
+
+    std::vector<bool> visitado(n, false);
+    std::vector<int> recorrido;
+
+    // DFS recursiva con vecinos ordenados por distancia
+    std::function<void(int)> dfs = [&](int u) {
+        visitado[u] = true;
+        recorrido.push_back(u);
+
+        // Ordenar vecinos por distancia creciente desde u
+        std::sort(adyacencia[u].begin(), adyacencia[u].end(), [&](int a, int b) {
+            return obtenerDistancia(u, a) < obtenerDistancia(u, b);
+        });
+
+        for (int v : adyacencia[u]) {
+            if (!visitado[v]) dfs(v);
+        }
+    };
+
+    dfs(inicio);
+    return recorrido;
+}
     
 };
 
