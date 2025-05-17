@@ -6,14 +6,14 @@
 #include <fstream>
 #include <sstream>
 
-// Function prototype for guardarSalida
-void guardarSalida(const std::string& nombreArchivo, const std::vector<int>& secuencia, const Grafo& grafo);
+// Declaración de funciones (prototipos)
 std::vector<Circuito> leerEntrada(const std::string& nombreArchivo);
+void guardarSalida(const std::string& nombreArchivo, const std::vector<int>& secuencia, const Grafo& grafo);
 
 int main() {
     std::vector<Circuito> circuitos = leerEntrada("entrada.txt");
 
-    for (int i = 0; i < circuitos.size(); ++i) {
+    for (size_t i = 0; i < circuitos.size(); ++i) {
         Grafo grafo;
 
         // Agregar nodos del circuito actual
@@ -33,7 +33,6 @@ int main() {
 
     return 0;
 }
-
 
 std::vector<Circuito> leerEntrada(const std::string& nombreArchivo) {
     std::ifstream in(nombreArchivo);
@@ -71,38 +70,16 @@ void guardarSalida(const std::string& nombreArchivo, const std::vector<int>& sec
         return;
     }
 
-    // Contar nodos más 2 (inicio y fin en 0,0)
-    out << "1\n";
-    out << secuencia.size() + 2 << "\n";
+    // Solo un circuito para este caso
+    out << "1\n";                       // Número de circuitos
+    out << secuencia.size() << "\n";    // Número de agujeros (sin contar inicio/fin)
 
-    // Inicio: (0,0)
-    out << "0 0\n";
-
-    float distanciaTotal = 0.0;
-
-    Nodo origen(0, 0);
-    Nodo anterior = origen;
-
-    // Recorrer nodos en la secuencia
+    // Puntos en orden optimizado
     for (int idx : secuencia) {
-        Nodo actual = grafo.obtenerNodo(idx);
-        out << actual.x << " " << actual.y << "\n";
-
-        // Sumar distancia entre puntos
-        float d = std::sqrt((actual.x - anterior.x) * (actual.x - anterior.x) +
-                            (actual.y - anterior.y) * (actual.y - anterior.y));
-        distanciaTotal += d;
-        anterior = actual;
+        const Nodo& nodo = grafo.obtenerNodo(idx);
+        out << nodo.x << " " << nodo.y << "\n";
     }
 
-    // Regresar al origen
-    float dRegreso = std::sqrt((anterior.x - 0)*(anterior.x - 0) + (anterior.y - 0)*(anterior.y - 0));
-    out << "0 0\n";
-    distanciaTotal += dRegreso;
-
     out.close();
-
     std::cout << "Archivo '" << nombreArchivo << "' generado exitosamente.\n";
-    std::cout << "Distancia total recorrida: " << distanciaTotal << " mm\n";
 }
-
