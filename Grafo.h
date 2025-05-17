@@ -25,6 +25,6 @@ public:
     std::vector<int> recorridoDFSporMST();
 };
 
-#include "Grafo.hxx" // Incluye implementaciones aquí
+#include "Grafo.hxx"
 
 #endif

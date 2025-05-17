@@ -3,6 +3,14 @@
 
 #include "Nodo.h"
 
-inline Nodo::Nodo(float x, float y) : x(x), y(y) {}
+Nodo::Nodo() {
+    x = 0.0;
+    y = 0.0;
+}
+
+Nodo::Nodo(float xCoord, float yCoord) {
+    x = xCoord;
+    y = yCoord;
+}
 
 #endif
